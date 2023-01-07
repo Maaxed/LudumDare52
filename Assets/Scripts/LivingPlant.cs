@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class LivingPlant : MonoBehaviour
 {
+    public Animator animator;
     public Collider2D plantCollider;
     public Rigidbody2D plantRigidbody;
     public FixedJoint2D joint;
@@ -21,18 +22,18 @@ public class LivingPlant : MonoBehaviour
 
     private void Awake()
     {
+        if (animator == null)
+            animator = GetComponentInChildren<Animator>();
+
         if (plantRigidbody == null)
-        {
             plantRigidbody = GetComponentInChildren<Rigidbody2D>();
-        }
+
         if (plantCollider == null)
-        {
             plantCollider = GetComponentInChildren<Collider2D>();
-        }
+
         if (joint == null)
-        {
             joint = GetComponentInChildren<FixedJoint2D>();
-        }
+
         nextChoiceTime = Time.time + Random.Range(0.5f, 2.0f);
     }
 
@@ -48,12 +49,18 @@ public class LivingPlant : MonoBehaviour
 
         if (direction >= 0)
         {
-            plantRigidbody.velocity = moveDirections[direction] * speed;
-
+            Vector2 velocity = moveDirections[direction] * speed;
+            plantRigidbody.velocity = velocity;
+            animator.SetBool("walking", true);
+            animator.SetFloat("speedX", velocity.x);
+            animator.SetFloat("speedY", velocity.y);
         }
         else
         {
             plantRigidbody.velocity = Vector2.zero;
+            animator.SetBool("walking", false);
+            animator.SetFloat("speedX", 0.0f);
+            animator.SetFloat("speedY", 0.0f);
         }
     }
 
@@ -77,6 +84,7 @@ public class LivingPlant : MonoBehaviour
         joint.connectedBody = mouse.GetComponent<Rigidbody2D>();
         joint.enabled = true;
         plantCollider.enabled = false;
+        animator.SetBool("walking", false);
     }
 
     public void Ungrab()
